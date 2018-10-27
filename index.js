@@ -133,6 +133,7 @@ function showWinnerAlert(msg) {
         swal({
             type: 'success',
             title: msg,
+            showConfirmButton: false,
             timer: 1500
         });
     } else {
