@@ -57,7 +57,7 @@ function getRowBoxes(colIdx) {
             content = '<span class="cross">X</span>';
         }
         else if (gridValue === 2) {
-            content = '<span class="cross">O</span>';
+            content = '<span class="circle">O</span>';
         }
         rowDivs = rowDivs + '<div colIdx="'+ colIdx +'" rowIdx="' + rowIdx + '" class="box ' +
             additionalClass + '">' + content + '</div>';

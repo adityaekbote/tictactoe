@@ -33,6 +33,8 @@
     height: 100;
     cursor: pointer;
     display: flex;
+    border-style: groove;
+    border-color: #795548;
     justify-content: center;
     align-items: center;
 }
@@ -45,8 +47,22 @@
 }
 
 .cross{
-    color: #f90;
+    color: #4caf50;
     font-size: 2.5em;
     border-radius: 5px;
     line-height: 100px;
+    animation: fadein 0.5s;
+}
+
+.circle{
+    color: #ff5722;
+    font-size: 2.5em;
+    border-radius: 5px;
+    line-height: 100px;
+    animation: fadein 1s;
+}
+
+@keyframes fadein {
+    from { opacity: 0.5; }
+    to   { opacity: 1; }
 }
