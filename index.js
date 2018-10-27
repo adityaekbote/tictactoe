@@ -99,8 +99,14 @@ function onBoxClick() {
         showWinnerAlert('You WIN! :)');
     } else if (won === 'comp') {
         showWinnerAlert('Computer WINS! :(');
+        window.setTimeout(() => {
+            window.location.reload(true);
+        }, 1500);
     } else if  (won === 'draw') {
         showWinnerAlert('It\'s a DRAW! :|');
+        window.setTimeout(() => {
+            window.location.reload(true);
+        }, 1500);
     }
     renderMainGrid();
     addClickHandlers();
