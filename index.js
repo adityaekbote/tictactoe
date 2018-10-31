@@ -20,9 +20,9 @@
  */
 const grid = [];
 let playNum = 0;
-const GRID_LENGTH = 3;
+let GRID_LENGTH = 3;
 let turn = 'X';
-const winArray = [];
+let winArray = [];
 
 function initializeGrid() {
     playNum = 0;
@@ -36,15 +36,24 @@ function initializeGrid() {
     initializeWinArray();
 }
 
+function changeGridLength() {
+    const value = document.getElementById("gridLength").value ?
+        parseInt(document.getElementById("gridLength").value) : 2;
+    GRID_LENGTH = value;
+    initializeGrid();
+    renderMainGrid();
+    addClickHandlers();
+}
+
 function initializeWinArray() {
-    for (let i = 0;i < 2*GRID_LENGTH+2; i++) {
+    winArray = [];
+    for (let i = 0;i < (2*GRID_LENGTH)+2; i++) {
         winArray.push(0);
     }
 }
 
 function getRowBoxes(colIdx) {
     let rowDivs = '';
-    
     for(let rowIdx=0; rowIdx < GRID_LENGTH ; rowIdx++ ) {
         let additionalClass = 'darkBackground';
         let content = '';
@@ -75,55 +84,54 @@ function getColumns() {
     return columnDivs;
 }
 
+function gridLengthInput() {
+    return `<input type="number" id="gridLength" min="2" max="12" value=${GRID_LENGTH} oninput="changeGridLength()" />`;
+}
+
 function renderMainGrid() {
     const parent = document.getElementById("grid");
     const columnDivs = getColumns();
-    parent.innerHTML = '<div class="columnsStyle">' + columnDivs + '</div>';
+    parent.innerHTML = '<div> GRID SIZE: ' + gridLengthInput() + '</div><br /><div class="columnsStyle">' + columnDivs + '</div>';
 }
 
 function onBoxClick() {
     var rowIdx = this.getAttribute("rowIdx");
     var colIdx = this.getAttribute("colIdx");
     let newValue = 1;
-    playNum += 1;
-    grid[colIdx][rowIdx] = newValue;
-    incrementWinArray(colIdx, rowIdx, 1);
-    naturalComputerPlays();
-    const won = checkWinner();
-    if (won === 'player') {
-        startConfetti();
-        window.setTimeout(() => {
-            stopConfetti();
-            window.location.reload(true);
-        }, 1000);
-        showWinnerAlert('You WIN! :)');
-    } else if (won === 'comp') {
-        showWinnerAlert('Computer WINS! :(');
-        window.setTimeout(() => {
-            window.location.reload(true);
-        }, 1500);
-    } else if  (won === 'draw') {
-        showWinnerAlert('It\'s a DRAW! :|');
-        window.setTimeout(() => {
-            window.location.reload(true);
-        }, 1500);
+    if (!grid[colIdx][rowIdx]) {
+        playNum += 1;
+        grid[colIdx][rowIdx] = newValue;
+        incrementWinArray(colIdx, rowIdx, 1);
+        randomComputerPlays();
+        const won = checkWinner();
+        if (won === 'player') {
+            flashWinner('You Win! :)', 3000, true);
+        } else if (won === 'comp') {
+            flashWinner('Computer WINS! :(');
+        } else if  (won === 'draw') {
+            flashWinner('It\'s a Draw!')
+        }
+        renderMainGrid();
+        addClickHandlers();
     }
-    renderMainGrid();
-    addClickHandlers();
+}
+
+function flashWinner(msg, timer = 2000, confetti = false) {
+    confetti ? startConfetti() : null;
+    showWinnerAlert(msg);
+    window.setTimeout(() => {
+        confetti ? stopConfetti() : null;
+        window.location.reload(true);
+    }, timer);
 }
 
 function checkWinner() {
-    if (playNum === (GRID_LENGTH*GRID_LENGTH)) {
-        return 'draw';
-    }
-    for (let i = 0; i < winArray.length; i++) {
-        if (winArray[i] === 3 || winArray[i] === -3) {
-            if (winArray[i] === 3) {
-                return 'player'
-            } else if (winArray[i] === -3) {
-                return 'comp';
-            }
-        }
+    if (winArray.includes(GRID_LENGTH)) {
+        return 'player'
+    } else if (winArray.includes(-GRID_LENGTH)) {
+        return 'comp';
+    } else if (playNum >= (GRID_LENGTH*GRID_LENGTH)) {
+        return 'draw'
     }
     return false;
 }
@@ -134,7 +142,6 @@ function showWinnerAlert(msg) {
             type: 'success',
             title: msg,
             showConfirmButton: false,
-            timer: 1500
         });
     } else {
         alert(msg);
@@ -145,17 +152,18 @@ function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-// Throws out of stack.. will think and fix! :(
-// function randomComputerPlays() {
-//     const randomColIdx = getRandomInt(1, 100) % GRID_LENGTH;
-//     const randomRowIdx = getRandomInt(1, 100) % GRID_LENGTH;
-//     while(grid[randomColIdx][randomRowIdx] !== 0) {
-//         randomComputerPlays();
-//     }
-//     grid[randomColIdx][randomRowIdx] = 2;
-//     incrementWinArray(randomColIdx, randomRowIdx, -1);
-//     return;
-// }
+function randomComputerPlays() {
+    const randomColIdx = getRandomInt(1, 100) % GRID_LENGTH;
+    const randomRowIdx = getRandomInt(1, 100) % GRID_LENGTH;
+    playNum += 1;
+    if(grid[randomColIdx][randomRowIdx] !== 0) {
+        naturalComputerPlays();
+    } else {
+        grid[randomColIdx][randomRowIdx] = 2;
+        incrementWinArray(randomColIdx, randomRowIdx, -1);
+    }
+    return;
+}
 
 function naturalComputerPlays() {
     for (let colIdx = 0;colIdx < GRID_LENGTH; colIdx++) {
@@ -170,12 +178,12 @@ function naturalComputerPlays() {
 }
 
 function incrementWinArray(colIdx, rowIdx, incrBy) {
-    winArray[rowIdx] += incrBy;
-    winArray[GRID_LENGTH + colIdx] += incrBy;
-    if (rowIdx == colIdx) {
+    winArray[parseInt(rowIdx)] += incrBy;
+    winArray[GRID_LENGTH + parseInt(colIdx)] += incrBy;
+    if (parseInt(rowIdx) === parseInt(colIdx)) {
         winArray[2*GRID_LENGTH] += incrBy;
     }
-    if (GRID_LENGTH - 1 - colIdx == rowIdx) {
+    if (GRID_LENGTH - 1 - parseInt(colIdx) === parseInt(rowIdx)) {
         winArray[2*GRID_LENGTH + 1] += incrBy;
     }
 }
